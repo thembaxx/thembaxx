@@ -20,12 +20,38 @@ I care about **accessible UX, maintainable components, performance, and reliable
 
 ## Selected projects
 
-| Project | Explore |
-| --- | --- |
-| **Lumnie** — Frontend and UI/UX exploration | [Live app](https://lumnie.vercel.app) · [Code](https://github.com/thembaxx/lumnie) |
-| **ProcodiApp** — Interface and product design exploration | [Live app](https://procodiapp.vercel.app/?design=wallet) · [Code](https://github.com/thembaxx/procodiapp) |
-| **CityLit** — Web application | [Live app](https://citylit.vercel.app) · [Code](https://github.com/thembaxx/citylit) |
-| **Hydromental** — Web application | [Live app](https://hydromental.vercel.app) · [Code](https://github.com/thembaxx/hydromental) |
+A selection of my mobile-first interfaces and interactive web applications. Click any screenshot to explore the live experience.
+
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href="https://lumnie.vercel.app"><img src="./assets/lumnie.PNG" alt="Lumnie mobile learning and discovery dashboard" width="100%" /></a>
+      <br /><strong>Lumnie</strong><br />
+      Curiosity-driven learning and discovery experience.<br />
+      <a href="https://lumnie.vercel.app">Live demo</a> · <a href="https://github.com/thembaxx/lumnie">Source</a>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href="https://procodiapp.vercel.app/?design=wallet"><img src="./assets/procodiapp.PNG" alt="ProcodiApp grocery offers and delivery comparison interface" width="100%" /></a>
+      <br /><strong>ProcodiApp</strong><br />
+      Grocery offers discovery and comparison interface.<br />
+      <a href="https://procodiapp.vercel.app/?design=wallet">Live demo</a> · <a href="https://github.com/thembaxx/procodiapp">Source</a>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href="https://citylit.vercel.app"><img src="./assets/citylit.PNG" alt="CityLit interactive Cape Town and Bo-Kaap exploration interface" width="100%" /></a>
+      <br /><strong>CityLit</strong><br />
+      Interactive city and landmark exploration.<br />
+      <a href="https://citylit.vercel.app">Live demo</a> · <a href="https://github.com/thembaxx/citylit">Source</a>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href="https://hydromental.vercel.app"><img src="./assets/hydromental.PNG" alt="Hydromental Elementals interactive sulfur atomic model" width="100%" /></a>
+      <br /><strong>Hydromental</strong><br />
+      Interactive periodic-table learning experience.<br />
+      <a href="https://hydromental.vercel.app">Live demo</a> · <a href="https://github.com/thembaxx/hydromental">Source</a>
+    </td>
+  </tr>
+</table>
 
 ## Experience
 
