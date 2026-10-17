@@ -1,0 +1,58 @@
+# Scheduled public-URL smoke checks for Themba's portfolio projects.
+# 06:30 UTC = 08:30 SAST year-round.
+# GitHub may delay scheduled workflows; this is not a real-time uptime SLA.
+name: Portfolio site health
+
+on:
+  schedule:
+    - cron: "30 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-sites:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe live sites
+        shell: bash
+        env:
+          SITES: |
+            https://hydromental.vercel.app
+            https://citylit.vercel.app
+            https://procodiapp.vercel.app
+            https://lumnie.vercel.app
+        run: |
+          set -uo pipefail
+          echo "## Portfolio site health" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Site | HTTP | Duration (seconds) | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | ---: | ---: | --- |" >> "$GITHUB_STEP_SUMMARY"
+
+          failures=0
+          while IFS= read -r site; do
+            [[ -z "$site" ]] && continue
+            response=$(curl --location --silent --show-error \
+              --retry 2 --retry-delay 2 --retry-all-errors \
+              --connect-timeout 10 --max-time 30 \
+              --output /dev/null --write-out "%{http_code} %{time_total}" \
+              "$site") || response="000 0"
+            read -r code seconds <<< "$response"
+
+            if [[ "$code" =~ ^2[0-9][0-9]$ ]]; then
+              echo "| $site | $code | $seconds | OK |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "| $site | $code | $seconds | FAIL |" >> "$GITHUB_STEP_SUMMARY"
+              failures=$((failures + 1))
+            fi
+          done <<< "$SITES"
+
+          if (( failures > 0 )); then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**$failures site(s) failed.** Check Vercel protection, deployment and domain configuration before assuming the site is down." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "All public sites responded with a successful HTTP status." >> "$GITHUB_STEP_SUMMARY"
