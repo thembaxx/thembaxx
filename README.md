@@ -6,7 +6,7 @@ I'm a South African frontend developer with **4+ years of professional experienc
 
 I care about **accessible UX, maintainable components, performance, and reliable delivery**. I bring both frontend engineering and UI/UX design perspectives to my work, and use AI-assisted workflows to accelerate research, implementation, and debugging without skipping testing.
 
-**Open to remote Frontend Developer, React Developer, and Frontend Engineer opportunities.**
+**Freelance frontend developer, building websites and Shopify websites. Open to remote Frontend Developer, React Developer, Frontend Engineer and contract opportunities.**
 
 [🌐 Portfolio](https://www.Themba.dev) · [💼 LinkedIn](https://www.linkedin.com/in/themba-p) · [✉️ Email](mailto:me@themba.dev)
 
@@ -66,3 +66,15 @@ Promoted from Junior Frontend Developer. Built internal applications, Zoho CRM w
 I'm interested in collaborating on meaningful products and joining teams that value clean implementation, strong UX, and continuous learning.
 
 📧 **me@themba.dev** · [LinkedIn](https://www.linkedin.com/in/themba-p) · [Portfolio](https://www.Themba.dev)
+
+## More engineering work
+
+| Project | Focus | Status and evidence |
+| --- | --- | --- |
+| [Leesmaat](https://github.com/thembaxx/leesmaat) | English and Afrikaans literacy | Offline reading archive; optional Google sync |
+| [Nuzzle](https://github.com/thembaxx/mypets) | Daily pet-care companion | Local care routines and a labelled sample experience |
+| [HomeBuyer](https://github.com/thembaxx/homebuyer) | South African property due diligence | Editable cost assumptions and sourced enrichment; estimates have explicit limits |
+| [StokvelOS](https://github.com/thembaxx/stockvel) | Stokvel administration | Prototype and financial foundation; production workflows remain incomplete |
+| [MatricMaster AI](https://github.com/thembaxx/matricmaster-ai) | Grade 12 study tooling | AI and database integrations require configuration |
+
+Project READMEs document implementation details, setup requirements and limitations. Lumnie (`lumnie`) and Lumni (`lumni`) are separate repositories.
