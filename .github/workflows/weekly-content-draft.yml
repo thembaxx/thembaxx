@@ -1,5 +1,10 @@
 name: Weekly verified release draft
 on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/draft-project-updates.mjs
+      - .github/workflows/weekly-content-draft.yml
   schedule:
     - cron: "43 12 * * 1"
   workflow_dispatch:
