@@ -1,5 +1,10 @@
 name: Public PWA readiness
 on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/audit-pwas.mjs
+      - .github/workflows/public-pwa-audit.yml
   schedule:
     - cron: "39 7 * * 2"
   workflow_dispatch:
