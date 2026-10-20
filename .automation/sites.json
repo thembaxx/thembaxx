@@ -1,0 +1,38 @@
+[
+  {
+    "id": "hydromental",
+    "url": "https://hydromental.vercel.app",
+    "screenshot": true,
+    "pwa": false
+  },
+  {
+    "id": "citylit",
+    "url": "https://citylit.vercel.app",
+    "screenshot": true,
+    "pwa": true
+  },
+  {
+    "id": "procodiapp",
+    "url": "https://procodiapp.vercel.app",
+    "screenshot": true,
+    "pwa": true
+  },
+  {
+    "id": "leesmaat",
+    "url": "https://leesmaat.vercel.app",
+    "screenshot": true,
+    "pwa": true
+  },
+  {
+    "id": "mypets",
+    "url": "https://mypets-pi.vercel.app",
+    "screenshot": true,
+    "pwa": true
+  },
+  {
+    "id": "homebuyer",
+    "url": "https://homebuyer-seven.vercel.app",
+    "screenshot": true,
+    "pwa": false
+  }
+]
