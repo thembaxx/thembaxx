@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "21 8 * * 1"
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/project-digest.mjs
+      - .github/workflows/weekly-project-digest.yml
 permissions:
   contents: read
   actions: read
