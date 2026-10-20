@@ -1,0 +1,31 @@
+name: Public PWA readiness
+on:
+  schedule:
+    - cron: "39 7 * * 2"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: public-pwa-audit
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check published app manifests and icons
+        run: node scripts/audit-pwas.mjs
+      - name: Preserve PWA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pwa-readiness
+          path: reports/pwa-health.json
+          retention-days: 14
+          if-no-files-found: warn
