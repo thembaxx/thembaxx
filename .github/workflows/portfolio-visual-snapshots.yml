@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: portfolio-visual
   cancel-in-progress: true
@@ -27,6 +28,19 @@ jobs:
         env:
           PLAYWRIGHT_MODULE: ${{ runner.temp }}/site-qa/node_modules/playwright
         run: node scripts/capture-sites.cjs
+      - name: Load previous verified screenshot artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id=$(gh run list --workflow portfolio-visual-snapshots.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -n "$id" ]; then
+            gh run download "$id" --name portfolio-screenshots --dir "$RUNNER_TEMP/baseline" || echo 'Baseline unavailable; first-run comparison skipped.'
+          fi
+      - name: Report screenshot differences without false deployment failures
+        env:
+          PNGJS_MODULE: ${{ runner.temp }}/site-qa/node_modules/pngjs
+          BASELINE_DIR: ${{ runner.temp }}/baseline
+        run: node scripts/compare-sites.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
