@@ -1,5 +1,10 @@
 name: Portfolio site health
 on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/check-sites.mjs
+      - .github/workflows/portfolio-site-health.yml
   schedule:
     # Every four hours; Actions schedules may be delayed.
     - cron: "17 */4 * * *"
