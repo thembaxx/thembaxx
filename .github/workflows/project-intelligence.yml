@@ -22,12 +22,16 @@ jobs:
       - name: Aggregate verified GitHub project signals
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node scripts/project-intelligence.mjs
+        run: |
+          node scripts/project-intelligence.mjs
+          node scripts/project-digest.mjs
       - name: Preserve report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: weekly-project-intelligence
-          path: reports/project-intelligence.json
+          path: |
+            reports/project-intelligence.json
+            automation/reports/project-digest.md
           if-no-files-found: warn
           retention-days: 30
