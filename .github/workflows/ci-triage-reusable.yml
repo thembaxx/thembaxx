@@ -1,0 +1,64 @@
+name: Reusable CI failure triage
+on:
+  workflow_call:
+    inputs:
+      run_id:
+        type: number
+        required: true
+      workflow_name:
+        type: string
+        required: true
+permissions:
+  actions: read
+  issues: write
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Open or update a deduplicated CI failure issue
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          FAILED_RUN_ID: \${{ inputs.run_id }}
+          FAILED_WORKFLOW: \${{ inputs.workflow_name }}
+        with:
+          script: |
+            const runId = Number(process.env.FAILED_RUN_ID);
+            if (!Number.isSafeInteger(runId) || runId < 1) throw new Error("Invalid workflow run ID");
+            const name = (process.env.FAILED_WORKFLOW || "CI").slice(0, 100);
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+              ...context.repo, run_id: runId, per_page: 100
+            });
+            const failed = jobs.filter(job => job.conclusion === "failure");
+            if (!failed.length) {
+              core.info("No failed jobs reported. No issue created.");
+              return;
+            }
+            const title = "[CI triage] " + name;
+            const runUrl = "https://github.com/" + context.repo.owner + "/" + context.repo.repo + "/actions/runs/" + runId;
+            const lines = [
+              "Automatically generated from failed CI job and step names; logs and secrets are NOT copied.",
+              "",
+              "**Latest failing run:** " + runUrl,
+              "**Checked:** " + new Date().toISOString(),
+              "",
+              "## Failed jobs and steps",
+            ];
+            for (const job of failed.slice(0, 20)) {
+              lines.push("- **" + job.name.replaceAll("|", "/") + "**: " + job.html_url);
+              for (const step of (job.steps || []).filter(s => s.conclusion === "failure").slice(0, 10))
+                lines.push("  - " + step.name.replaceAll("|", "/"));
+            }
+            lines.push("", "## Next steps", "1. Review the job logs and last successful run.", "2. Reproduce locally and fix the root cause on a branch.", "3. Verify CI before merging. Do not copy secrets into this issue.");
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              ...context.repo, state: "open", per_page: 100
+            });
+            const existing = issues.find(item => !item.pull_request && item.title === title);
+            if (existing) {
+              if (existing.body?.includes(runUrl)) { core.info("Run already recorded."); return; }
+              await github.rest.issues.update({ ...context.repo, issue_number: existing.number, body: lines.join("\n") });
+              core.info("Updated issue #" + existing.number);
+            } else {
+              const issue = await github.rest.issues.create({ ...context.repo, title, body: lines.join("\n") });
+              core.info("Created issue #" + issue.data.number);
+            }
