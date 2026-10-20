@@ -1,0 +1,51 @@
+name: Reusable failure triage
+on:
+  workflow_call:
+permissions:
+  contents: read
+  actions: read
+  issues: write
+jobs:
+  report:
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: File or update a single issue per failing workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            if (!run || run.conclusion !== 'failure') return;
+            if (run.head_branch !== context.payload.repository.default_branch) return;
+            if (run.head_repository?.full_name !== context.repo.owner + '/' + context.repo.repo) return;
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+              ...context.repo, run_id: run.id, per_page: 100
+            });
+            const failed = jobs.filter(j => j.conclusion === 'failure');
+            if (!failed.length) return;
+            const title = '[automation] CI failure: ' + run.name;
+            const lines = [
+              'An automated check failed on the default branch.',
+              '',
+              'Run: ' + run.html_url,
+              'Commit: ' + run.head_sha,
+              'Failed jobs:'
+            ];
+            for (const job of failed) {
+              const steps = (job.steps || []).filter(s => s.conclusion === 'failure').map(s => s.name);
+              lines.push('- ' + job.name + (steps.length ? ' — ' + steps.join(', ') : '') + ' (' + job.html_url + ')');
+            }
+            lines.push('', 'Investigate logs and reproduce locally. Do not apply fixes or merge automatically.');
+            const issueList = await github.paginate(github.rest.issues.listForRepo, {
+              ...context.repo, state: 'open', per_page: 100
+            });
+            const current = issueList.find(i => !i.pull_request && i.title === title);
+            if (current) {
+              const comments = await github.rest.issues.listComments({...context.repo, issue_number: current.number, per_page: 100});
+              if (!comments.data.some(c => c.body?.includes('Run: ' + run.html_url))) {
+                await github.rest.issues.createComment({...context.repo, issue_number: current.number, body: lines.join('\n')});
+              }
+            } else {
+              await github.rest.issues.create({...context.repo, title, body: lines.join('\n')});
+            }
