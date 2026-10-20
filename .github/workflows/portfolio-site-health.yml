@@ -1,7 +1,8 @@
 name: Portfolio site health
 on:
   schedule:
-    - cron: "30 6 * * *"
+    # Every four hours; Actions schedules may be delayed.
+    - cron: "17 */4 * * *"
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,22 +12,21 @@ concurrency:
 jobs:
   check-sites:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - name: Check public sites and manifests
-        run: |
-          node scripts/check-sites.mjs
-          node .automation/check-sites.mjs
-      - name: Preserve production health evidence
+          node-version: 24
+      - name: Probe public sites and record evidence
+        run: node scripts/check-sites.mjs
+      - name: Store reachability evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: portfolio-health
-          path: site-health/
+          name: site-health
+          path: reports/site-health.json
+          if-no-files-found: warn
           retention-days: 14

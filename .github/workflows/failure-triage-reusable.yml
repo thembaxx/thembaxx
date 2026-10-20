@@ -1,0 +1,54 @@
+name: Reusable failure triage
+on:
+  workflow_call:
+permissions:
+  actions: read
+  issues: write
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect failed steps without executing PR code
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            if (!run || run.conclusion !== "failure") return;
+            if (run.head_repository?.full_name !== context.repo.owner + "/" + context.repo.repo) return;
+            const { data } = await github.rest.actions.listJobsForWorkflowRun({
+              ...context.repo, run_id: run.id, per_page: 100
+            });
+            const failures = data.jobs
+              .filter(j => j.conclusion === "failure")
+              .map(j => ({ name: j.name, step: j.steps?.find(s => s.conclusion === "failure")?.name || "unknown" }));
+            const safe = value => String(value).replaceAll("|", "/").replaceAll("\n", " ").slice(0, 120);
+            const table = failures.map(x => "| " + safe(x.name) + " | " + safe(x.step) + " |").join("\n");
+            const body = [
+              "Automated failure report. This is **diagnostic**, not an AI-authored fix.",
+              "",
+              "Run: " + run.html_url,
+              "Commit: " + run.head_sha,
+              "Event: " + run.event,
+              "",
+              "| Failed job | Failed step |",
+              "| --- | --- |",
+              table || "| Unknown | Inspect workflow logs |",
+              "",
+              "Review the failure before modifying code, credentials or production deployments."
+            ].join("\n");
+            await core.summary.addRaw(body).write();
+            const title = "CI triage: " + safe(run.name);
+            try {
+              const { data: issues } = await github.rest.issues.listForRepo({
+                ...context.repo, state: "open", per_page: 100
+              });
+              const current = issues.find(issue => !issue.pull_request && issue.title === title);
+              if (current) {
+                await github.rest.issues.createComment({ ...context.repo, issue_number: current.number, body });
+              } else {
+                await github.rest.issues.create({ ...context.repo, title, body });
+              }
+            } catch (error) {
+              core.warning("Issue unavailable; see this run summary: " + error.message);
+            }
