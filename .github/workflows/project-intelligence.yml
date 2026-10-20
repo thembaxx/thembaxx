@@ -1,0 +1,33 @@
+name: Weekly project intelligence
+on:
+  schedule:
+    - cron: "19 7 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: weekly-project-intelligence
+  cancel-in-progress: false
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Aggregate verified GitHub project signals
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/project-intelligence.mjs
+      - name: Preserve report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-project-intelligence
+          path: reports/project-intelligence.json
+          if-no-files-found: warn
+          retention-days: 30
