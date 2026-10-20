@@ -1,5 +1,10 @@
 name: Public repository automation inventory
 on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/repository-inventory.mjs
+      - .github/workflows/repository-inventory.yml
   workflow_dispatch:
   schedule:
     - cron: "31 6 * * 2"
