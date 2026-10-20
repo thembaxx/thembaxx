@@ -30,7 +30,7 @@ jobs:
         run: node scripts/check-sites.mjs
       - name: Store reachability evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: site-health
           path: reports/site-health.json
