@@ -1,0 +1,85 @@
+name: Reusable lightweight frontend quality
+on:
+  workflow_call:
+    inputs:
+      run_tests:
+        type: boolean
+        default: false
+        required: false
+      run_build:
+        type: boolean
+        default: false
+        required: false
+permissions:
+  contents: read
+jobs:
+  verify:
+    name: TypeScript, lint and selected scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Identify package manager
+        id: manager
+        shell: bash
+        run: |
+          if grep -Eq '"packageManager"[[:space:]]*:[[:space:]]*"pnpm@' package.json || test -f pnpm-lock.yaml; then
+            echo 'name=pnpm' >> "$GITHUB_OUTPUT"
+          elif grep -Eq '"packageManager"[[:space:]]*:[[:space:]]*"bun@' package.json || test -f bun.lock || test -f bun.lockb; then
+            echo 'name=bun' >> "$GITHUB_OUTPUT"
+          else
+            echo 'name=npm' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: pnpm/action-setup@v4
+        if: steps.manager.outputs.name == 'pnpm'
+        with:
+          run_install: false
+      - uses: oven-sh/setup-bun@v2
+        if: steps.manager.outputs.name == 'bun'
+        with:
+          bun-version: latest
+      - name: Install declared project dependencies without lifecycle scripts
+        shell: bash
+        env:
+          MANAGER: ${{ steps.manager.outputs.name }}
+        run: |
+          case "$MANAGER" in
+            pnpm) pnpm install --frozen-lockfile --ignore-scripts ;;
+            bun) bun install --frozen-lockfile --ignore-scripts ;;
+            npm)
+              if test -f package-lock.json; then
+                npm ci --ignore-scripts --no-audit --no-fund
+              else
+                npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+              fi
+              ;;
+            *) exit 2 ;;
+          esac
+      - name: Execute available validation scripts
+        env:
+          MANAGER: ${{ steps.manager.outputs.name }}
+          RUN_TESTS: ${{ inputs.run_tests }}
+          RUN_BUILD: ${{ inputs.run_build }}
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync } from "node:fs";
+          import { spawnSync } from "node:child_process";
+          const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+          const scripts = pkg.scripts || {};
+          const checks = ["typecheck", "lint"];
+          if (process.env.RUN_TESTS === "true") checks.push("test");
+          if (process.env.RUN_BUILD === "true") checks.push("build");
+          const manager = process.env.MANAGER;
+          const existing = checks.filter(name => Object.hasOwn(scripts, name));
+          if (!existing.length) console.log("No selected validation scripts declared; nothing to run.");
+          for (const name of existing) {
+            console.log("Running " + manager + " run " + name);
+            const child = spawnSync(manager, ["run", name], { stdio: "inherit", shell: false });
+            if (child.error || child.status !== 0) process.exit(child.status || 1);
+          }
+          JS
