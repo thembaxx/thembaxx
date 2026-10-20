@@ -20,7 +20,9 @@ jobs:
         with:
           node-version: 22
       - name: Check public sites and manifests
-        run: node .automation/check-sites.mjs
+        run: |
+          node scripts/check-sites.mjs
+          node .automation/check-sites.mjs
       - name: Preserve production health evidence
         if: always()
         uses: actions/upload-artifact@v4
