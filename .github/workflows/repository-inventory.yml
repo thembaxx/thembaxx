@@ -1,0 +1,34 @@
+name: Public repository automation inventory
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "31 6 * * 2"
+permissions:
+  contents: read
+concurrency:
+  group: repository-inventory
+  cancel-in-progress: false
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Inventory owner repositories and CI coverage
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO_AUDIT_TOKEN: ${{ secrets.REPO_AUDIT_TOKEN }}
+        run: node scripts/repository-inventory.mjs
+      - name: Attach inventory report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-automation-inventory
+          path: reports/repo-inventory.json
+          retention-days: 30
+          if-no-files-found: warn
