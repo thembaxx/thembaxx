@@ -1,33 +1,29 @@
-# Engineering automation
+# Repository and product automation
 
-This repository provides shared, read-only portfolio monitoring and failure triage for public projects. No private repo secrets or customer data are aggregated.
+The GitHub profile repository coordinates **public** operational diagnostics for maintained projects. It does not access customer financial data, credentials or private repository source code.
 
-- `automation/sites.json`: explicitly verified public deployment URLs. Modify deliberately; never add private or authenticated endpoints.
-- `portfolio-site-health.yml`: four checks daily; HTTP 401/403 is labeled PROTECTED, not confirmed healthy.
-- `portfolio-visual-snapshots.yml`: weekly actual desktop 1440x900, mobile 390x844 and tablet 820x1180 screenshots uploaded as Actions artifacts. Screenshots are **not** automatically committed, because updates need visual review.
-- `weekly-project-digest.yml`: Monday public GitHub Actions and issue statistics. Product usage and financial metrics are not connected.
-- `reusable-failure-triage.yml`: called by repository-local workflow_run hooks. Creates or updates one open issue per failing workflow on the default branch; it does not run untrusted PR code, apply fixes, or merge anything.
+## Active workflows
 
-## Call shared triage from an application repository
+| Workflow | Purpose | Schedule |
+| --- | --- | --- |
+| `portfolio-site-health.yml` | Validate configured production websites, manifests and HTTP response status; upload a health report | Daily |
+| `site-visual-audit.yml` | Capture actual 1440×900, 390×844 and 820×1180 production screenshots, compare with the previous successful artifact and upload diff images for review | Weekly, Tuesday |
+| `weekly-project-digest.yml` | Summarize public repo CI, open issues and recent failures; upload Markdown report | Weekly, Monday |
+| `reusable-failure-triage.yml` | Deduplicate failure issues for default-branch CI runs; consumed by application workflows | Event-driven |
+| `ci-triage-reusable.yml` | Additional targeted failure triage for data refresh and release workflows | Event-driven |
 
-```yaml
-name: CI failure triage
-on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-permissions:
-  contents: read
-  actions: read
-  issues: write
-jobs:
-  triage:
-    if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.head_branch == github.event.repository.default_branch
-    uses: thembaxx/thembaxx/.github/workflows/reusable-failure-triage.yml@main
-```
+Public endpoint and screenshot configuration is in `.automation/sites.json`. The health checker and screenshot tooling are in `.automation/`. The weekly engineering digest implementation is `scripts/project-digest.mjs`.
 
-Caller workflow name must match its existing CI check exactly. GitHub Actions must be enabled and Issues must be available. Ensure any workflow_call permissions do not exceed the caller. This intentionally produces actionable diagnostics, not unreviewed changes.
+## Limitations and safeguards
 
-## Safety
+- Visual differences are review signals, not automatic deploy blockers. Dynamic application data and fonts can legitimately change screenshots.
+- GitHub-scheduled runs can be delayed and are not a suitable sole scheduler for customer-facing financial or transactional operations.
+- Website authentication challenges are not proof of production downtime; inspect protected URLs separately.
+- Product usage, revenue, retention and conversion figures are not accessible here and must remain **unavailable** until a consent-respecting analytics source is connected.
+- Automated failure triage only creates diagnostic issues. It does not execute untrusted pull-request code, push speculative fixes or merge PRs.
+- Existing per-repository CI, releases, content-refresh pipelines and security checks remain authoritative; the central jobs supplement them.
+- Never publish secrets, customer identifiers, private report contents or unpublished product details into public workflows or artifacts.
 
-Never fetch user private data or use protected services from public status checks. Do not add production credentials to these workflows. GitHub scheduled events can be delayed; time-sensitive product operations should use a dedicated queue/cron provider with idempotent jobs.
+## Future operational rollout
+
+Production data jobs such as retailer scraping, bank reconciliation, supplier notifications, paid report fulfilment and account discovery require stable external providers, verified rights to sources, a durable backing service, bounded retries and tested idempotency before scheduling. Keep payment/payout, medical, safety and identity-sensitive decisions behind an explicit approved transaction.
