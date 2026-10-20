@@ -45,7 +45,7 @@ jobs:
               });
               const current = issues.find(issue => !issue.pull_request && issue.title === title);
               if (current) {
-                await github.rest.issues.createComment({ ...context.repo, issue_number: current.number, body });
+                await github.rest.issues.update({ ...context.repo, issue_number: current.number, body });
               } else {
                 await github.rest.issues.create({ ...context.repo, title, body });
               }
