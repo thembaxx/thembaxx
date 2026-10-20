@@ -1,5 +1,11 @@
 name: Weekly project intelligence
 on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/project-intelligence.mjs
+      - scripts/project-digest.mjs
+      - .github/workflows/project-intelligence.yml
   schedule:
     - cron: "19 7 * * 1"
   workflow_dispatch:
