@@ -20,7 +20,7 @@ I care about **accessible UX, maintainable components, performance, and reliable
 
 ## Selected projects
 
-A selection of my mobile-first interfaces and interactive web applications. Click any screenshot to explore the live experience.
+A selection of my mobile-first interfaces and interactive web applications. Each preview is a committed project image; click to explore the linked deployment.
 
 <table>
   <tr>
@@ -55,8 +55,11 @@ A selection of my mobile-first interfaces and interactive web applications. Clic
 
 ## Experience
 
-**Frontend Developer · RattleHub** — Nov 2024–Present  
-Designing, prototyping, building, and testing modern frontend experiences in an early-stage product environment. Working with React, TypeScript, Tailwind CSS, component systems, and AI-assisted development workflows.
+**Freelance Frontend Developer · Independent** — Oct 2026–Present  
+Designing and building responsive websites and Shopify storefronts for clients, combining frontend engineering with practical UI/UX design.
+
+**Frontend Developer · RattleHub (Contract)** — Nov 2024–Oct 2026  
+Developed and tested product interfaces with React, TypeScript, Tailwind CSS, reusable component systems and AI-assisted engineering workflows. Some client work is confidential and is not reproduced here.
 
 **Frontend Developer · HeyCarter** — Apr 2022–Sep 2024  
 Promoted from Junior Frontend Developer. Built internal applications, Zoho CRM widgets, and public-facing websites using React and modern frontend tooling.
@@ -73,7 +76,7 @@ I'm interested in collaborating on meaningful products and joining teams that va
 | --- | --- | --- |
 | [Leesmaat](https://github.com/thembaxx/leesmaat) | English and Afrikaans literacy | Offline reading archive; optional Google sync |
 | [Nuzzle](https://github.com/thembaxx/mypets) | Daily pet-care companion | Local care routines and a labelled sample experience |
-| [HomeBuyer](https://github.com/thembaxx/homebuyer) | South African property due diligence | Editable cost assumptions and sourced enrichment; estimates have explicit limits |
+| [HomeBuyer](https://github.com/thembaxx/homebuyer) | South African property due diligence | [Live demo](https://homebuyer-seven.vercel.app/) · Editable cost assumptions; estimates have explicit limits |
 | [StokvelOS](https://github.com/thembaxx/stockvel) | Stokvel administration | Prototype and financial foundation; production workflows remain incomplete |
 | [MatricMaster AI](https://github.com/thembaxx/matricmaster-ai) | Grade 12 study tooling | AI and database integrations require configuration |
 
