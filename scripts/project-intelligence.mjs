@@ -1,7 +1,10 @@
-import { readFile, appendFile, mkdir, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, writeFile } from "node:fs/promises";
 
-const repos = JSON.parse(await readFile("automation/projects.json", "utf8"));
-const token = process.env.GITHUB_TOKEN;
+const token = process.env.REPO_AUDIT_TOKEN || process.env.GITHUB_TOKEN;
+const repos = [];
+const repositoryEndpoint = process.env.REPO_AUDIT_TOKEN
+  ? "/user/repos?affiliation=owner&per_page=100"
+  : "/users/thembaxx/repos?type=owner&per_page=100";
 if (!token) throw new Error("GITHUB_TOKEN is required for the GitHub-only report");
 const owner = "thembaxx";
 const since = new Date(Date.now() - 14 * 86400000).toISOString();
@@ -17,9 +20,18 @@ async function github(path) {
   return response.json();
 }
 
+for (let page = 1; page <= 4; page++) {
+  const endpoint = repositoryEndpoint + "&page=" + page;
+  const response = await fetch("https://api.github.com" + endpoint, { headers, redirect: "manual", signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw Error("Could not enumerate repositories: HTTP " + response.status);
+  const items = await response.json();
+  if (!Array.isArray(items)) throw Error("Unexpected repository response");
+  repos.push(...items.filter(r => r.owner?.login?.toLowerCase() === owner && !r.archived).map(r => r.name));
+  if (items.length < 100) break;
+}
+repos.sort((a,b) => a.localeCompare(b));
 const report = [];
 for (const name of repos) {
-  if (["lumni", "lumnie", "matricmaster-ai"].includes(name)) continue;
   const item = { repository: owner + "/" + name, windowDays: 14, ci: { success: 0, failure: 0, cancelled: 0, skipped: 0 }, latest: null, openIssues: null, errors: [] };
   try {
     const path = "/repos/" + owner + "/" + encodeURIComponent(name);
@@ -43,7 +55,8 @@ for (const name of repos) {
 
 const result = {
   generatedAt: new Date().toISOString(),
-  methodology: "GitHub Actions and repository metadata only; no visitor counts, revenue, conversion or product usage inferred.",
+  methodology: "All accessible, currently unarchived owner repositories. GitHub Actions and repository metadata only; no visitor counts, revenue, conversion or product usage inferred.",
+  scope: process.env.REPO_AUDIT_TOKEN ? "Owner token visibility" : "Public repositories only; set REPO_AUDIT_TOKEN for private repositories",
   windowDays: 14,
   projects: report,
 };
@@ -55,7 +68,8 @@ const table = report.map(p => {
 });
 const output = [
   "## Weekly project intelligence", "",
-  "14-day repository and CI signals, **not product usage or monetization metrics**.", "",
+  "14-day repository and CI signals, **not product usage or monetization metrics**.",
+  "Coverage: " + result.scope + " (" + report.length + " repositories).", "",
   "| Repository | CI signal | Successful runs | Failed runs |",
   "| --- | --- | ---: | ---: |", ...table,
   "", "Missing product analytics are **unknown**, never zero.",
