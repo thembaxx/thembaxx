@@ -56,7 +56,7 @@ for (const r of scoped) {
   let toolchain = null;
   if (manifest.status === 200 && manifest.data?.type === "file" && manifest.data.content) {
     try {
-      const pkg = JSON.parse(Buffer.from(manifest.data.content.replace(/\\s/g, ""), "base64").toString("utf8"));
+      const pkg = JSON.parse(Buffer.from(manifest.data.content.replace(/\s/g, ""), "base64").toString("utf8"));
       scripts = Object.keys(pkg.scripts || {}).sort();
       const deps = { ...pkg.dependencies, ...pkg.devDependencies };
       toolchain = Object.fromEntries(["typescript", "oxlint", "oxfmt", "eslint"].filter(k => deps[k]).map(k => [k, deps[k]]));
