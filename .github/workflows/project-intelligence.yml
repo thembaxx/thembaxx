@@ -6,6 +6,11 @@ on:
       - scripts/project-intelligence.mjs
       - scripts/project-digest.mjs
       - .github/workflows/project-intelligence.yml
+  pull_request:
+    paths:
+      - scripts/project-intelligence.mjs
+      - scripts/project-digest.mjs
+      - .github/workflows/project-intelligence.yml
   schedule:
     - cron: "19 7 * * 1"
   workflow_dispatch:
@@ -25,9 +30,14 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+      - name: Check audit script syntax
+        run: |
+          node --check scripts/project-intelligence.mjs
+          node --check scripts/project-digest.mjs
       - name: Aggregate verified GitHub project signals
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          REPO_AUDIT_TOKEN: ${{ secrets.REPO_AUDIT_TOKEN }}
         run: |
           node scripts/project-intelligence.mjs
           node scripts/project-digest.mjs
