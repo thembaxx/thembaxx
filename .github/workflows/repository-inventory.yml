@@ -5,6 +5,10 @@ on:
     paths:
       - scripts/repository-inventory.mjs
       - .github/workflows/repository-inventory.yml
+  pull_request:
+    paths:
+      - scripts/repository-inventory.mjs
+      - .github/workflows/repository-inventory.yml
   workflow_dispatch:
   schedule:
     - cron: "31 6 * * 2"
@@ -24,6 +28,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+      - name: Check inventory script syntax
+        run: node --check scripts/repository-inventory.mjs
       - name: Inventory owner repositories and CI coverage
         env:
           GITHUB_TOKEN: ${{ github.token }}
