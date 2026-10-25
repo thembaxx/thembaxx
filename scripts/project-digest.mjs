@@ -15,7 +15,7 @@ for (const item of projects) {
   const repo = item.repository?.split("/")[1] || "unknown";
   const latest = item.latest;
   const state = item.errors?.length
-    ? "Unavailable (" + item.errors.join("; ").replace(/\\|/g, "/") + ")"
+    ? "Unavailable (" + item.errors.join("; ").replace(/\|/g, "/") + ")"
     : latest ? "[" + (latest.conclusion || "in progress") + "](" + latest.url + ")" : "No recent runs";
   const outcomes = (item.ci?.failure || 0) + " failed / " + (item.ci?.success || 0) + " succeeded";
   lines.push("| [" + repo + "](https://github.com/thembaxx/" + repo + ") | " +
